@@ -24,15 +24,14 @@ const StartupForm = () => {
 
   // untuk menghandle submit form
   const handleFormSubmit = async (prevState: any, formData: FormData) => {
+    const formValues = {
+      title: formData.get("title") as string,
+      description: formData.get("description") as string,
+      category: formData.get("category") as string,
+      link: formData.get("link") as string,
+      pitch,
+    };
     try {
-      const formValues = {
-        title: formData.get("title") as string,
-        description: formData.get("description") as string,
-        category: formData.get("category") as string,
-        link: formData.get("link") as string,
-        pitch,
-      };
-
       await formSchema.parseAsync(formValues); // validasi form menggunakan zod
 
       const result = await createStartup(prevState, formData, pitch); // create startup
@@ -61,19 +60,48 @@ const StartupForm = () => {
           variant: "destructive",
         });
 
-        return { ...prevState, error: "Validation Invalid", status: "ERROR" }; // kembalikan state error
+        return {
+          ...prevState,
+          error: "Validation Invalid",
+          status: "ERROR",
+          field: {
+            title: formValues.title,
+            description: formValues.description,
+            category: formValues.category,
+            link: formValues.link,
+          },
+        }; // kembalikan state error
       }
       toast({
         title: "Error",
         description: "Unexpected error",
         variant: "destructive",
       });
-      return { ...prevState, error: "Something went wrong", status: "ERROR" }; // kembalikan state error jika bukan zod
+      return {
+        ...prevState,
+        error: "Something went wrong",
+        status: "ERROR",
+        field: {
+          title: formValues.title,
+          description: formValues.description,
+          category: formValues.category,
+          link: formValues.link,
+        },
+      }; // kembalikan state error jika bukan zod
     }
   };
 
   // menggunakan useActionState untuk menghandle state dari form
-  const [state, formAction, isPending] = useActionState(handleFormSubmit, { error: "", status: "INITIAL" });
+  const [state, formAction, isPending] = useActionState(handleFormSubmit, {
+    error: "",
+    status: "INITIAL",
+    field: {
+      title: "",
+      description: "",
+      category: "",
+      link: "",
+    },
+  });
 
   console.log(state);
   return (
@@ -83,28 +111,28 @@ const StartupForm = () => {
         <label htmlFor="title" className="startup-form_label">
           Title
         </label>
-        <Input id="title" name="title" className="startup-form_input mb-5" required placeholder="Startup Title" />
+        <Input id="title" name="title" className="startup-form_input mb-5" required placeholder="Startup Title" defaultValue={state.field.title} />
         {errors.title && <p className="text-red-500">{errors.title}</p>}
 
         {/* Description */}
         <label htmlFor="description" className="startup-form_label">
           Description
         </label>
-        <Textarea id="description" name="description" className="startup-form_textarea mb-5" required placeholder="Startup Description" />
+        <Textarea id="description" name="description" className="startup-form_textarea mb-5" required placeholder="Startup Description" defaultValue={state.field.description} />
         {errors.description && <p className="text-red-500">{errors.description}</p>}
 
         {/* Category */}
         <label htmlFor="category" className="startup-form_label">
           Category
         </label>
-        <Input id="category" name="category" className="startup-form_input mb-5" required placeholder="Startup Category (Tech, Nature, Education...)" />
+        <Input id="category" name="category" className="startup-form_input mb-5" required placeholder="Startup Category (Tech, Nature, Education...)" defaultValue={state.field.category} />
         {errors.category && <p className="text-red-500">{errors.category}</p>}
 
         {/* Image Link */}
         <label htmlFor="link" className="startup-form_label">
           Image URL
         </label>
-        <Input id="link" name="link" className="startup-form_input mb-5" required placeholder="Startup Image URL" />
+        <Input id="link" name="link" className="startup-form_input mb-5" required placeholder="Startup Image URL" defaultValue={state.field.link} />
         {errors.link && <p className="text-red-500">{errors.link}</p>}
 
         {/* Pitch */}

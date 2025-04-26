@@ -8,7 +8,7 @@ import { writeClient } from "@/sanity/lib/write-client";
 export const createStartup = async (state: any, form: FormData, pitch: string) => {
   const session = await auth();
   if (!session) {
-    return parseServerActionResponse({ error: "Unauthorized", status: "ERROR" });
+    return parseServerActionResponse({ error: "Unauthorized", status: "ERROR", field: { title: "", description: "", category: "", link: "" } });
   }
 
   // ambil semua data dari form
@@ -40,8 +40,8 @@ export const createStartup = async (state: any, form: FormData, pitch: string) =
 
     const result = await writeClient.create({ _type: "startup", ...newStartup }); // create startup baru di database
 
-    return parseServerActionResponse({ ...result, error: "", status: "SUCCESS" }); // kembalikan hasil dari create
+    return parseServerActionResponse({ ...result, error: "", status: "SUCCESS", field: { title: "", description: "", category: "", link: "" } }); // kembalikan hasil dari create
   } catch (error) {
-    return parseServerActionResponse({ error: JSON.stringify(error), status: "ERROR" });
+    return parseServerActionResponse({ error: JSON.stringify(error), status: "ERROR", field: { title, description, category, link } });
   }
 };
